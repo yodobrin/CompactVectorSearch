@@ -1,4 +1,4 @@
-namespace VectorLibrary.Utils
+namespace VectorLibrary
 {
     public class VectorMath
     {

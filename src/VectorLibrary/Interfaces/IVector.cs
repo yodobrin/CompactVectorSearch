@@ -1,4 +1,4 @@
-namespace VectorLibrary.Interfaces
+namespace VectorLibrary
 {
     public interface IVector
     {

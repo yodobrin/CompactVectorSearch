@@ -6,13 +6,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using CsvHelper;
 using CsvHelper.Configuration;
-using VectorLibrary.Models;
-using VectorLibrary.Interfaces;
-using VectorLibrary.Collections;
-// using Azure; 
 using Azure.AI.OpenAI;
 
-namespace VectorLibrary.Utils
+namespace VectorLibrary
 {
     public static class StoreUtility
     {
@@ -39,14 +35,14 @@ namespace VectorLibrary.Utils
             return rows;
         }
 
-        public static async Task SaveVectorCollectionAsync<T>(VectorCollection<T> collection, string jsonFilePath) where T : IVector
+        public static async Task SaveVectorCollectionAsync(VectorCollection collection, string jsonFilePath)
         {
             await collection.SaveToDiskAsync(jsonFilePath);
         }
 
-        public static async Task<VectorCollection<T>> LoadVectorCollectionAsync<T>(string jsonFilePath) where T : IVector
+        public static async Task<VectorCollection> LoadVectorCollectionAsync(string jsonFilePath)
         {
-            return await VectorCollection<T>.CreateFromDiskAsync(jsonFilePath);
+            return await VectorCollection.CreateFromDiskAsync(jsonFilePath);
         }
     }
 }

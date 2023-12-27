@@ -1,6 +1,6 @@
-using VectorLibrary.Interfaces;
 
-namespace VectorLibrary.Models
+
+namespace VectorLibrary
 {
     public class FunctionCodePair : IVector
     {
@@ -17,6 +17,11 @@ namespace VectorLibrary.Models
         public float[] GetVector()
         {
             return FunctionVector ?? throw new InvalidOperationException("FunctionVector is not set.");
+        }
+
+        public FunctionCodePair GetSafeVersion()
+        {
+            return new FunctionCodePair(Id, Function, Code);
         }
 
     }

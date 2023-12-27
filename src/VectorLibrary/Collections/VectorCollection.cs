@@ -1,15 +1,12 @@
 using System.Text.Json;
 using System.IO;
-using VectorLibrary.Models;
-using VectorLibrary.Utils;
-using VectorLibrary.Interfaces;
 
-namespace VectorLibrary.Collections
+namespace VectorLibrary
 {
-    public class VectorCollection<T> where T : IVector
+    public class VectorCollection
     {
         private readonly int dimensions;
-        private List<T> objects = new List<T>();
+        private List<FunctionCodePair> objects = new List<FunctionCodePair>();
 
 
         public async Task SaveToDiskAsync(string path)
@@ -18,12 +15,24 @@ namespace VectorLibrary.Collections
             await File.WriteAllTextAsync(path, json);
         }
 
+        public static async Task<VectorCollection> CreateFromMemoryAsync(Stream dataStream)
+        {
+            long start = DateTime.Now.Ticks; 
+            using var reader = new StreamReader(dataStream);
+            string jsonFromStream = await reader.ReadToEndAsync();
+            List<FunctionCodePair> loadedObjects = JsonSerializer.Deserialize<List<FunctionCodePair>>(jsonFromStream) ?? new List<FunctionCodePair>();
 
-        public static async Task<VectorCollection<T>> CreateFromDiskAsync(string path)
+            var collection = new VectorCollection(1536);
+            collection.AddRange(loadedObjects);
+            long endtime = DateTime.Now.Ticks;
+            Console.WriteLine($"Time to load data from memory: {(float)(endtime - start) / TimeSpan.TicksPerMillisecond} ms");
+            return collection;
+        }
+        public static async Task<VectorCollection> CreateFromDiskAsync(string path)
         {
             string jsonFromFile = await File.ReadAllTextAsync(path);            
-            List<T> loadedObjects = JsonSerializer.Deserialize<List<T>>(jsonFromFile) ?? new List<T>();
-            var collection = new VectorCollection<T>(1536);
+            List<FunctionCodePair> loadedObjects = JsonSerializer.Deserialize<List<FunctionCodePair>>(jsonFromFile) ?? new List<FunctionCodePair>();
+            var collection = new VectorCollection(1536);
             collection.AddRange(loadedObjects);
             return collection;
         }
@@ -36,12 +45,12 @@ namespace VectorLibrary.Collections
 
         public int Dimensions => dimensions;
 
-        public void Add(T obj)
+        public void Add(FunctionCodePair obj)
         {
             objects.Add(obj);
         }
 
-        public void AddRange(IEnumerable<T> _objects
+        public void AddRange(IEnumerable<FunctionCodePair> _objects
         )
         {
             objects.AddRange(_objects);
@@ -60,7 +69,7 @@ namespace VectorLibrary.Collections
         * The isMaxBetter parameter is used to determine whether the best match is the highest or lowest value. (future use)
         * The vectorSelector parameter is used to select the vector to compare against the query vector.
         */
-        private SearchResult FindBestMatch(float[] query, Func<T, float[]> vectorSelector, ComparisonStrategy strategy)
+        private SearchResult FindBestMatch(float[] query, Func<FunctionCodePair, float[]> vectorSelector, ComparisonStrategy strategy)
         {
             // measure the time it take for Search
             long start = DateTime.Now.Ticks; 
@@ -78,20 +87,20 @@ namespace VectorLibrary.Collections
             }
             long endtime = DateTime.Now.Ticks;
 
-            return new SearchResult(objects[bestIndex], bestValue, (float)(endtime - start) / TimeSpan.TicksPerMillisecond);
+            return new SearchResult(objects[bestIndex].GetSafeVersion(), bestValue, (float)(endtime - start) / TimeSpan.TicksPerMillisecond);
         }
     
-        public SearchResult FindByDotProduct(float[] query, Func<T, float[]> vectorSelector)
+        public SearchResult FindByDotProduct(float[] query, Func<FunctionCodePair, float[]> vectorSelector)
         {
             return FindBestMatch(query, vectorSelector, VectorMath.DotProduct);
         }
 
-        public SearchResult FindByCosineSimilarity(float[] query, Func<T, float[]> vectorSelector)
+        public SearchResult FindByCosineSimilarity(float[] query, Func<FunctionCodePair, float[]> vectorSelector)
         {
             return FindBestMatch(query, vectorSelector, VectorMath.CosineSimilarity);
         }
 
-        public SearchResult FindByEuclideanDistance(float[] query, Func<T, float[]> vectorSelector)
+        public SearchResult FindByEuclideanDistance(float[] query, Func<FunctionCodePair, float[]> vectorSelector)
         {
             // we negate the distance to use the isMaxBetter logic
             return FindBestMatch(query, vectorSelector, (a, b) => -VectorMath.EuclideanDistance(a, b)); 

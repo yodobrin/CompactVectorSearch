@@ -1,18 +1,17 @@
-using VectorLibrary.Interfaces;
 
-namespace VectorLibrary.Models
+namespace VectorLibrary
 {
     public class SearchResult
     {
-        public IVector Item { get; set; }
+        public FunctionCodePair Item { get; set; }
         public float Value { get; set; }
-        public float ms {get; set;}
+        public float Ms { get; set; } 
 
-        public SearchResult(IVector item, float value, float ms)
+        public SearchResult(FunctionCodePair item, float value, float ms)
         {
             Item = item;
             Value = value;
-            this.ms = ms;
+            Ms = ms;
         }
     }
 }
