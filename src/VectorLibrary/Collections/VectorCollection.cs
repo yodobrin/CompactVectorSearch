@@ -14,7 +14,11 @@ namespace VectorLibrary
             string json = JsonSerializer.Serialize(objects, new JsonSerializerOptions { WriteIndented = true });
             await File.WriteAllTextAsync(path, json);
         }
-
+        // return the objects as a list
+        public List<FunctionCodePair> GetFunctionCodePairs()
+        {
+            return objects;
+        }
         public static async Task<VectorCollection> CreateFromMemoryAsync(Stream dataStream)
         {
             long start = DateTime.Now.Ticks; 

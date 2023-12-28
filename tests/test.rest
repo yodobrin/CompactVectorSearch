@@ -1,0 +1,4 @@
+
+curl -X 'GET' \
+  'http://localhost:8080/search/cosine?query=i%20am%20seeking%20to%20find%20my%20team%20commision%20data' \
+  -H 'accept: */*'
